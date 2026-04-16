@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diet Quality Screener — Mini-EAT Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Karla:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f8f6f1;
+    --surface: #ffffff;
+    --surface-2: #f2efe8;
+    --border: #e0dbd0;
+    --text: #2c2a25;
+    --text-mid: #6b6560;
+    --text-light: #9c9790;
+    --green: #3a6b4a;
+    --green-light: #e8f2eb;
+    --amber: #8b6914;
+    --amber-light: #faf0d8;
+    --red: #7a2e2e;
+    --red-light: #f5e8e8;
+    --accent: #5c7a3e;
+    --serif: 'Playfair Display', Georgia, serif;
+    --sans: 'Karla', sans-serif;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 400;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--text);
+    color: var(--bg);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 40px;
+    background: var(--bg);
+    clip-path: ellipse(55% 100% at 50% 100%);
+  }
+
+  .header-eyebrow {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(248,246,241,0.55);
+    margin-bottom: 1rem;
+  }
+
+  .header h1 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+  }
+
+  .header h1 em { font-style: italic; color: rgba(248,246,241,0.7); }
+
+  .header-sub {
+    font-size: 0.88rem;
+    color: rgba(248,246,241,0.6);
+    max-width: 520px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.7;
+  }
+
+  .citation-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(248,246,241,0.1);
+    border: 1px solid rgba(248,246,241,0.2);
+    border-radius: 20px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: rgba(248,246,241,0.7);
+    letter-spacing: 0.02em;
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 5rem;
+  }
+
+  /* ── INTRO NOTE ── */
+  .intro-note {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+    font-size: 0.84rem;
+    color: var(--text-mid);
+    line-height: 1.65;
+  }
+
+  .intro-note strong { color: var(--text); font-weight: 600; }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--text-light);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── QUESTIONS ── */
+  .question-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .question-card.answered {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(92,122,62,0.15);
+  }
+
+  .question-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1.1rem;
+  }
+
+  .question-num {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    color: var(--text-light);
+    line-height: 1;
+    min-width: 1.5rem;
+    padding-top: 2px;
+  }
+
+  .question-body { flex: 1; }
+
+  .question-text {
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 400;
+    line-height: 1.4;
+    margin-bottom: 0.35rem;
+    color: var(--text);
+  }
+
+  .question-examples {
+    font-size: 0.78rem;
+    color: var(--text-light);
+    font-style: italic;
+  }
+
+  /* Direction badge */
+  .direction-badge {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .direction-badge.positive {
+    background: var(--green-light);
+    color: var(--green);
+  }
+
+  .direction-badge.negative {
+    background: var(--red-light);
+    color: var(--red);
+  }
+
+  /* Frequency options */
+  .options {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.4rem;
+  }
+
+  @media (max-width: 540px) {
+    .options { grid-template-columns: repeat(5, 1fr); gap: 0.25rem; }
+  }
+
+  .option-btn {
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    padding: 0.55rem 0.25rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+    font-family: var(--sans);
+  }
+
+  .option-btn:hover { border-color: var(--accent); background: var(--green-light); }
+
+  .option-btn.selected {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .option-freq {
+    font-size: 0.72rem;
+    font-weight: 600;
+    display: block;
+    line-height: 1.2;
+  }
+
+  .option-label {
+    font-size: 0.6rem;
+    color: currentColor;
+    opacity: 0.7;
+    display: block;
+    margin-top: 0.15rem;
+    line-height: 1.2;
+  }
+
+  .option-btn.selected .option-label { opacity: 0.85; }
+
+  /* ── SUBMIT ── */
+  .submit-section {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .submit-btn {
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    padding: 1rem 3rem;
+    font-family: var(--sans);
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s, opacity 0.2s;
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  .submit-btn.ready {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .submit-btn.ready:hover { background: var(--accent); }
+  .submit-btn:active { transform: scale(0.98); }
+
+  .submit-note {
+    font-size: 0.75rem;
+    color: var(--text-light);
+    margin-top: 0.75rem;
+  }
+
+  /* ── RESULTS ── */
+  #results { display: none; margin-top: 2.5rem; }
+  #results.visible { display: block; }
+
+  .score-hero {
+    background: var(--text);
+    color: var(--bg);
+    border-radius: var(--radius);
+    padding: 2.5rem 2rem;
+    text-align: center;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .score-hero::before {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+    top: -100px; right: -80px;
+  }
+
+  .score-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(248,246,241,0.5);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+
+  .score-number {
+    font-family: var(--serif);
+    font-size: clamp(4rem, 12vw, 6rem);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+  }
+
+  .score-max { font-size: 1.5rem; opacity: 0.4; }
+
+  .score-tier {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-style: italic;
+    margin-bottom: 1rem;
+  }
+
+  .score-tier.healthy { color: #8bc4a0; }
+  .score-tier.intermediate { color: #f0c97a; }
+  .score-tier.unhealthy { color: #e09090; }
+
+  .score-description {
+    font-size: 0.84rem;
+    color: rgba(248,246,241,0.65);
+    max-width: 440px;
+    margin: 0 auto;
+    line-height: 1.65;
+  }
+
+  /* Score bar */
+  .score-bar-container {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    height: 6px;
+    margin: 1.25rem auto 0;
+    max-width: 360px;
+    overflow: hidden;
+  }
+
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    width: 0%;
+  }
+
+  .score-bar-fill.healthy { background: #8bc4a0; }
+  .score-bar-fill.intermediate { background: #f0c97a; }
+  .score-bar-fill.unhealthy { background: #e09090; }
+
+  /* Threshold markers */
+  .threshold-labels {
+    display: flex;
+    justify-content: space-between;
+    max-width: 360px;
+    margin: 0.4rem auto 0;
+    font-size: 0.62rem;
+    color: rgba(248,246,241,0.35);
+    letter-spacing: 0.05em;
+  }
+
+  /* ── ITEM BREAKDOWN ── */
+  .breakdown-section {
+    margin-bottom: 1.5rem;
+  }
+
+  .breakdown-title {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .item-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--surface-2);
+  }
+
+  .item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    flex-shrink: 0;
+  }
+
+  .item-icon.good { background: var(--green-light); color: var(--green); }
+  .item-icon.ok   { background: var(--amber-light); color: var(--amber); }
+  .item-icon.low  { background: var(--red-light); color: var(--red); }
+
+  .item-name {
+    flex: 1;
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+
+  .item-response {
+    font-size: 0.78rem;
+    color: var(--text-mid);
+  }
+
+  .item-points {
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.85rem;
+    min-width: 45px;
+    text-align: right;
+  }
+
+  .item-points.good { color: var(--green); }
+  .item-points.ok   { color: var(--amber); }
+  .item-points.low  { color: var(--red); }
+
+  /* ── INTERPRETATION ── */
+  .interpretation-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .interpretation-box h3 {
+    font-family: var(--serif);
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .interpretation-box p {
+    font-size: 0.84rem;
+    color: var(--text-mid);
+    line-height: 1.7;
+    margin-bottom: 0.6rem;
+  }
+
+  .interpretation-box p:last-child { margin-bottom: 0; }
+
+  /* ── ACTION ITEMS ── */
+  .actions-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+  }
+
+  .actions-list li {
+    font-size: 0.83rem;
+    color: var(--text-mid);
+    padding-left: 1.25rem;
+    position: relative;
+    line-height: 1.55;
+  }
+
+  .actions-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 0.75rem;
+  }
+
+  /* ── EVIDENCE BOX ── */
+  .evidence-box {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 1.25rem 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  .evidence-box h4 {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-light);
+    margin-bottom: 0.75rem;
+  }
+
+  .evidence-box p {
+    font-size: 0.78rem;
+    color: var(--text-mid);
+    line-height: 1.65;
+    margin-bottom: 0.5rem;
+  }
+
+  .evidence-box p:last-child { margin-bottom: 0; }
+
+  /* ── RETAKE ── */
+  .retake-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    margin-top: 1.5rem;
+    padding: 0.85rem;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 0.83rem;
+    font-weight: 500;
+    color: var(--text-mid);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .retake-btn:hover { border-color: var(--text); color: var(--text); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    font-size: 0.7rem;
+    color: var(--text-light);
+    line-height: 1.8;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">Validated dietary screener</div>
+  <h1>Diet Quality<br><em>Screener</em></h1>
+  <p class="header-sub">9 questions. Based on the Mini-EAT framework validated against the Healthy Eating Index (HEI-2015) at Mayo Clinic. Takes under 2 minutes.</p>
+  <div class="citation-badge">Lara-Breitinger et al. · JAHA 2023 · r = 0.71 vs full FFQ</div>
+</div>
+
+<main>
+
+  <div class="intro-note">
+    <strong>How to answer:</strong> Think about your typical diet over the past month — not your best week or worst week. Select the option that most honestly reflects your average weekly intake for each food group. There are no right or wrong answers.
+  </div>
+
+  <div class="progress-label" id="progressLabel">0 of 9 answered</div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+  <form id="miniEatForm">
+    <!-- Questions rendered by JS -->
+  </form>
+
+  <div class="submit-section">
+    <button class="submit-btn" id="submitBtn" onclick="calculateScore()" type="button">
+      Calculate my diet quality score
+    </button>
+    <p class="submit-note">Answer all 9 questions to continue</p>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+
+    <div class="score-hero">
+      <div class="score-label">Your Mini-EAT score</div>
+      <div class="score-number" id="scoreNumber">—<span class="score-max">/100</span></div>
+      <div class="score-tier" id="scoreTier">—</div>
+      <p class="score-description" id="scoreDesc">—</p>
+      <div class="score-bar-container">
+        <div class="score-bar-fill" id="scoreBarFill"></div>
+      </div>
+      <div class="threshold-labels">
+        <span>0</span>
+        <span>Unhealthy &lt;61</span>
+        <span>Intermediate</span>
+        <span>Healthy &gt;69</span>
+        <span>100</span>
+      </div>
+    </div>
+
+    <div class="breakdown-section">
+      <h2 class="breakdown-title">Score breakdown</h2>
+      <div id="itemBreakdown"></div>
+    </div>
+
+    <div class="interpretation-box" id="interpretationBox">
+      <h3>What this means</h3>
+      <p id="interpretationText"></p>
+      <ul class="actions-list" id="actionsList"></ul>
+    </div>
+
+    <div class="evidence-box">
+      <h4>About this screener</h4>
+      <p>This tool implements the Mini-EAT framework developed by Lara-Breitinger et al. (2023) at Mayo Clinic, published in the <em>Journal of the American Heart Association</em>. The original 9-item screener was validated against a 156-item food frequency questionnaire (VioScreen) in 661 adults, achieving a correlation of r = 0.71 with the Healthy Eating Index 2015.</p>
+      <p>The validated cutoff scores are: <strong>&gt;69 = healthy diet</strong> (sensitivity 0.85, specificity 0.73); <strong>&lt;61 = unhealthy diet</strong> (sensitivity 0.73, specificity 0.87). Item weights reflect the published regression coefficients from the validation study.</p>
+      <p>Limitations: validated primarily in a US clinical population (76% women, mean age 36, predominantly college-educated). Results may not generalise equally across all demographic groups. This screener assesses overall diet quality pattern — it does not diagnose individual nutrient deficiencies. Fruit juice is included in the fruit item consistent with HEI-2015 definitions; current 2020–2025 guidelines encourage whole fruit over juice where possible.</p>
+    </div>
+
+    <button class="retake-btn" onclick="resetTool()">↩ Retake the screener</button>
+
+  </div>
+
+</main>
+
+<footer>
+  Diet Quality Screener · Based on Mini-EAT framework · Lara-Breitinger KM et al. JAHA. 2023;12:e025064<br>
+  Not a substitute for clinical dietary assessment. For educational purposes only.
+</footer>
+
+<script>
+// ─── QUESTION DEFINITIONS ──────────────────────────────────────────────────
+// Based on Lara-Breitinger et al., JAHA 2023
+// Regression coefficients from Table S3 (standardised):
+//   Fruits: +2.12, Vegetables: +0.85, Whole grains: +1.44,
+//   Refined grains: −1.14, Fish/seafood: +0.90, Legumes/nuts/seeds: +0.72,
+//   Low-fat dairy: +0.81, High-fat dairy: −1.03, Sweets: −0.89
+//
+// Scoring: each item scored 0–4 based on frequency (never→daily+)
+// Positive items: higher frequency → higher points
+// Negative items: higher frequency → lower points
+// Total max = 100, calibrated to published cutoffs (>69 healthy, <61 unhealthy)
+
+const QUESTIONS = [
+  {
+    id: 'fruits',
+    text: 'How often do you eat fruit?',
+    examples: 'e.g. fresh, frozen, or canned fruit; 100% fruit juice (½ cup = 1 serving)',
+    direction: 'positive',
+    dirLabel: 'Aim higher',
+    weight: 2.12,
+    options: [
+      { label: 'Never', freq: 'never', value: 0 },
+      { label: '1–2×', freq: '/week', value: 1 },
+      { label: '3–4×', freq: '/week', value: 2 },
+      { label: '5–6×', freq: '/week', value: 3 },
+      { label: 'Daily+', freq: '≥1/day', value: 4 }
+    ]
+  },
+  {
+    id: 'vegetables',
+    text: 'How many servings of vegetables do you eat?',
+    examples: 'e.g. fresh, frozen, or cooked veg; salad; ½ cup cooked or 1 cup raw = 1 serving',
+    direction: 'positive',
+    dirLabel: 'Aim higher',
+    weight: 0.85,
+    options: [
+      { label: 'Never', freq: 'never', value: 0 },
+      { label: '1–2×', freq: '/week', value: 1 },
+      { label: '3–4×', freq: '/week', value: 2 },
+      { label: '5–6×', freq: '/week', value: 3 },
+      { label: 'Daily+', freq: '≥1/day', value: 4 }
+    ]
+  },
+  {
+    id: 'wholegrains',
+    text: 'How often do you eat whole grain foods?',
+    examples: 'e.g. oats, brown rice, whole wheat bread, quinoa, whole grain pasta, wholemeal products',
+    direction: 'positive',
+    dirLabel: 'Aim higher',
+    weight: 1.44,
+    options: [
+      { label: 'Never', freq: 'never', value: 0 },
+      { label: '1–2×', freq: '/week', value: 1 },
+      { label: '3–4×', freq: '/week', value: 2 },
+      { label: '5–6×', freq: '/week', value: 3 },
+      { label: 'Daily+', freq: '≥1/day', value: 4 }
+    ]
+  },
+  {
+    id: 'refinedgrains',
+    text: 'How often do you eat refined grain foods?',
+    examples: 'e.g. white bread, white rice, regular pasta, white flour products, crackers, most breakfast cereals',
+    direction: 'negative',
+    dirLabel: 'Aim lower',
+    weight: 1.14,
+    options: [
+      { label: 'Never', freq: 'never', value: 4 },
+      { label: '1–2×', freq: '/week', value: 3 },
+      { label: '3–4×', freq: '/week', value: 2 },
+      { label: '5–6×', freq: '/week', value: 1 },
+      { label: 'Daily+', freq: '≥1/day', value: 0 }
+    ]
+  },
+  {
+    id: 'fish',
+    text: 'How often do you eat fish or seafood?',
+    examples: 'e.g. salmon, sardines, cod, tuna, prawns, shellfish — fresh, frozen, or canned',
+    direction: 'positive',
+    dirLabel: 'Aim higher',
+    weight: 0.90,
+    options: [
+      { label: 'Never', freq: 'never', value: 0 },
+      { label: '1×', freq: '/month', value: 1 },
+      { label: '1×', freq: '/week', value: 2 },
+      { label: '2–3×', freq: '/week', value: 3 },
+      { label: '4×+', freq: '/week', value: 4 }
+    ]
+  },
+  {
+    id: 'legumes',
+    text: 'How often do you eat legumes, nuts, or seeds?',
+    examples: 'e.g. beans, lentils, chickpeas, tofu, edamame, almonds, walnuts, chia, hemp seeds',
+    direction: 'positive',
+    dirLabel: 'Aim higher',
+    weight: 0.72,
+    options: [
+      { label: 'Never', freq: 'never', value: 0 },
+      { label: '1–2×', freq: '/week', value: 1 },
+      { label: '3–4×', freq: '/week', value: 2 },
+      { label: '5–6×', freq: '/week', value: 3 },
+      { label: 'Daily+', freq: '≥1/day', value: 4 }
+    ]
+  },
+  {
+    id: 'lowfatdairy',
+    text: 'How often do you eat low-fat dairy or fortified plant milk alternatives?',
+    examples: 'e.g. skimmed or semi-skimmed milk, low-fat yogurt, low-fat cheese, 0% Greek yogurt; or fortified soy, oat, or almond milk and yogurt (check label for calcium)',
+    direction: 'positive',
+    dirLabel: 'Aim higher',
+    weight: 0.81,
+    options: [
+      { label: 'Never', freq: 'never', value: 0 },
+      { label: '1–2×', freq: '/week', value: 1 },
+      { label: '3–4×', freq: '/week', value: 2 },
+      { label: '5–6×', freq: '/week', value: 3 },
+      { label: 'Daily+', freq: '≥1/day', value: 4 }
+    ]
+  },
+  {
+    id: 'highfatdairy',
+    text: 'How often do you eat full-fat dairy or high-saturated-fat alternatives?',
+    examples: 'e.g. whole milk, full-fat cheese, cream, butter, full-fat yogurt, ice cream; or coconut-based yogurt, coconut milk/cream, and coconut-oil-based alternatives',
+    direction: 'negative',
+    dirLabel: 'Aim lower',
+    weight: 1.03,
+    options: [
+      { label: 'Never', freq: 'never', value: 4 },
+      { label: '1–2×', freq: '/week', value: 3 },
+      { label: '3–4×', freq: '/week', value: 2 },
+      { label: '5–6×', freq: '/week', value: 1 },
+      { label: 'Daily+', freq: '≥1/day', value: 0 }
+    ]
+  },
+  {
+    id: 'sweets',
+    text: 'How often do you eat sweet foods or sugary drinks?',
+    examples: 'e.g. cakes, biscuits, chocolate, sweets, pastries, fizzy drinks, fruit juice drinks, desserts',
+    direction: 'negative',
+    dirLabel: 'Aim lower',
+    weight: 0.89,
+    options: [
+      { label: 'Never', freq: 'never', value: 4 },
+      { label: '1–2×', freq: '/week', value: 3 },
+      { label: '3–4×', freq: '/week', value: 2 },
+      { label: '5–6×', freq: '/week', value: 1 },
+      { label: 'Daily+', freq: '≥1/day', value: 0 }
+    ]
+  }
+];
+
+// ─── SCORING ───────────────────────────────────────────────────────────────
+// Each item scored 0–4. We scale total weighted sum to 0–100.
+// Weights derived from published regression coefficients (normalised so max=100).
+// Total raw max = sum of (weight × 4) = (2.12+0.85+1.44+1.14+0.90+0.72+0.81+1.03+0.89) × 4
+// = 9.90 × 4 = 39.6
+// Scale factor = 100 / 39.6 ≈ 2.525
+
+const SCALE_FACTOR = 100 / (QUESTIONS.reduce((s, q) => s + q.weight, 0) * 4);
+const answers = {};
+
+// ─── RENDER QUESTIONS ─────────────────────────────────────────────────────
+function renderQuestions() {
+  const form = document.getElementById('miniEatForm');
+  form.innerHTML = QUESTIONS.map((q, i) => `
+    <div class="question-card" id="card-${q.id}">
+      <div class="question-header">
+        <span class="question-num">${i + 1}</span>
+        <div class="question-body">
+          <div class="question-text">${q.text}</div>
+          <div class="question-examples">${q.examples}</div>
+        </div>
+      </div>
+      <div class="options">
+        ${q.options.map(opt => `
+          <button type="button"
+            class="option-btn"
+            data-question="${q.id}"
+            data-value="${opt.value}"
+            onclick="selectOption('${q.id}', ${opt.value}, this)">
+            <span class="option-freq">${opt.label}</span>
+            <span class="option-label">${opt.freq}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectOption(questionId, value, btn) {
+  // Deselect siblings
+  document.querySelectorAll(`[data-question="${questionId}"]`).forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  answers[questionId] = value;
+  document.getElementById(`card-${questionId}`).classList.add('answered');
+  updateProgress();
+}
+
+function updateProgress() {
+  const count = Object.keys(answers).length;
+  const pct = (count / QUESTIONS.length) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${count} of ${QUESTIONS.length} answered`;
+  const btn = document.getElementById('submitBtn');
+  if (count === QUESTIONS.length) {
+    btn.classList.add('ready');
+  } else {
+    btn.classList.remove('ready');
+  }
+}
+
+// ─── CALCULATE ────────────────────────────────────────────────────────────
+function calculateScore() {
+  if (Object.keys(answers).length < QUESTIONS.length) return;
+
+  let rawScore = 0;
+  QUESTIONS.forEach(q => {
+    rawScore += q.weight * answers[q.id];
+  });
+
+  const score = Math.round(rawScore * SCALE_FACTOR);
+  renderResults(score);
+
+  document.getElementById('results').classList.add('visible');
+  setTimeout(() => {
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+function renderResults(score) {
+  // Score number
+  document.getElementById('scoreNumber').innerHTML = `${score}<span class="score-max">/100</span>`;
+
+  // Tier
+  let tier, tierClass, desc;
+  if (score > 69) {
+    tier = 'Healthy diet';
+    tierClass = 'healthy';
+    desc = 'Your diet quality aligns well with evidence-based dietary guidelines. This pattern is associated with lower cardiovascular risk.';
+  } else if (score >= 61) {
+    tier = 'Intermediate';
+    tierClass = 'intermediate';
+    desc = 'Your diet has good elements but has clear room for improvement in specific food groups. Small, targeted changes can meaningfully raise your score.';
+  } else {
+    tier = 'Needs improvement';
+    tierClass = 'unhealthy';
+    desc = 'Your current dietary pattern diverges substantially from evidence-based recommendations. This is common — and it is also changeable. Focus on 1–2 specific areas rather than overhauling everything at once.';
+  }
+
+  document.getElementById('scoreTier').textContent = tier;
+  document.getElementById('scoreTier').className = `score-tier ${tierClass}`;
+  document.getElementById('scoreDesc').textContent = desc;
+
+  // Bar
+  const bar = document.getElementById('scoreBarFill');
+  bar.className = `score-bar-fill ${tierClass}`;
+  setTimeout(() => { bar.style.width = score + '%'; }, 100);
+
+  // Item breakdown
+  const breakdown = document.getElementById('itemBreakdown');
+  const qNames = {
+    fruits: 'Fruit',
+    vegetables: 'Vegetables',
+    wholegrains: 'Whole grains',
+    refinedgrains: 'Refined grains',
+    fish: 'Fish & seafood',
+    legumes: 'Legumes, nuts & seeds',
+    lowfatdairy: 'Low-fat dairy',
+    highfatdairy: 'Full-fat dairy',
+    sweets: 'Sweets & sugary drinks'
+  };
+
+  breakdown.innerHTML = QUESTIONS.map(q => {
+    const val = answers[q.id];
+    const maxVal = 4;
+    const ratio = val / maxVal;
+    const pts = Math.round(q.weight * val * SCALE_FACTOR * 10) / 10;
+    const maxPts = Math.round(q.weight * maxVal * SCALE_FACTOR * 10) / 10;
+
+    let iconClass, iconSymbol;
+    if (ratio >= 0.75) { iconClass = 'good'; iconSymbol = '✓'; }
+    else if (ratio >= 0.375) { iconClass = 'ok'; iconSymbol = '~'; }
+    else { iconClass = 'low'; iconSymbol = '↓'; }
+
+    const optionLabel = q.options.find(o => o.value === val);
+    const responseText = optionLabel ? `${optionLabel.label} ${optionLabel.freq}` : '—';
+
+    const dirLabel = q.direction === 'negative'
+      ? `<span style="font-size:0.65rem;color:var(--text-light);margin-left:4px">(lower is better)</span>`
+      : '';
+
+    return `
+      <div class="item-row">
+        <div class="item-icon ${iconClass}">${iconSymbol}</div>
+        <div class="item-name">${qNames[q.id]}${dirLabel}</div>
+        <div class="item-response">${responseText}</div>
+        <div class="item-points ${iconClass}">${pts}/${maxPts}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Interpretation & actions
+  const lowItems = QUESTIONS
+    .filter(q => (answers[q.id] / 4) < 0.5)
+    .sort((a, b) => b.weight - a.weight);
+
+  const actions = {
+    fruits:      'Add fruit to breakfast or as a mid-morning snack — a handful of berries or a piece of fruit takes seconds.',
+    vegetables:  'Aim for at least 2 vegetable servings at lunch and dinner. Frozen veg is as nutritious as fresh and requires no prep.',
+    wholegrains: 'Swap white bread, white rice, or regular pasta for whole grain versions — the change is gradual and the nutritional difference is significant.',
+    refinedgrains: 'Reduce white bread, white rice, and processed cereals. Replace with whole grain alternatives or add more vegetables in their place.',
+    fish:        'Aim for 2 portions of oily fish per week (salmon, sardines, mackerel). Canned sardines and mackerel are affordable and require no cooking.',
+    legumes:     'Add lentils, chickpeas, or beans to 2–3 meals per week — in soups, salads, or as a side. A handful of nuts as a daily snack is a simple habit with good evidence behind it.',
+    lowfatdairy: 'Choose low-fat or fat-free dairy options — or fortified plant milks such as soy, oat, or almond milk. Look for products fortified with calcium and vitamin D, as these provide equivalent nutritional value to low-fat dairy. Plain low-fat Greek yogurt or fortified soy yogurt are both high-protein versatile options.',
+    highfatdairy: 'Use full-fat dairy more sparingly — or if you use plant-based alternatives, be aware that coconut-based products (coconut yogurt, coconut cream, coconut milk) can be equally high or higher in saturated fat than full-fat dairy. Opt for lower-saturated-fat alternatives such as oat, soy, or almond-based products instead.',
+    sweets:      'Reduce sugary drinks first — they add calories with no nutritional benefit. Limit biscuits, cakes, and desserts to occasional treats rather than daily habits.'
+  };
+
+  const topActions = lowItems.slice(0, 3).map(q => actions[q.id]);
+
+  let interpText = '';
+  if (score > 69) {
+    interpText = 'Your diet scores in the healthy range across the key food groups assessed. The Mini-EAT was validated with a cutoff of >69 for a healthy diet (sensitivity 0.85, specificity 0.73 against HEI-2015). Continue maintaining variety across fruits, vegetables, whole grains, and plant-based proteins.';
+  } else if (score >= 61) {
+    interpText = 'Your diet is in the intermediate range. This typically means some food groups are well-represented while others — often whole grains, legumes, or vegetables — are below recommended levels. The highest-impact changes for your diet are listed below.';
+  } else {
+    interpText = 'Your diet currently falls below the evidence-based threshold for diet quality. The validated cutoff for an "unhealthy" diet pattern is <61. This does not mean your diet is beyond improvement — it means there are several food group patterns that, if shifted, could meaningfully reduce your cardiovascular and chronic disease risk over time.';
+  }
+
+  document.getElementById('interpretationText').textContent = interpText;
+
+  const actionsList = document.getElementById('actionsList');
+  if (topActions.length > 0) {
+    actionsList.innerHTML = topActions.map(a => `<li>${a}</li>`).join('');
+  } else {
+    actionsList.innerHTML = '<li>Maintain your current dietary pattern and continue including a variety of whole foods.</li>';
+  }
+}
+
+function resetTool() {
+  Object.keys(answers).forEach(k => delete answers[k]);
+  document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+  document.querySelectorAll('.question-card').forEach(c => c.classList.remove('answered'));
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('scoreBarFill').style.width = '0%';
+  updateProgress();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+renderQuestions();
+updateProgress();
+</script>
+</body>
+</html>
